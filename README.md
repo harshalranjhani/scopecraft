@@ -8,9 +8,11 @@ Built from scratch during [Hacktoberfest 2026 Week 2: Side Hustle](https://dev.t
 
 ## Try it
 
-- **[Interactive demo](https://harshalranjhani.github.io/scopecraft/)** — editable examples, pricing, scope checks, backups, and PDF/Markdown export. GitHub Pages serves the frontend; it does not run inference. Examples are clearly labeled.
+- **[Interactive demo](https://harshalranjhani.github.io/scopecraft/)** — editable examples, a labeled replay of a real Qwen response, pricing, scope checks, backups, and PDF/Markdown export. GitHub Pages serves the frontend; it does not run inference. Examples are clearly labeled.
 
 The model generates a new scope. Saved examples let someone inspect the rest of the workflow without downloading weights. There is no template fallback disguised as AI generation.
+
+![ScopeCraft proposal workspace](assets/workspace.png)
 
 ## Run the complete app locally
 
@@ -25,7 +27,7 @@ Open **http://localhost:5173**. Examples work before a model is connected. Draft
 
 ### Optional local AI
 
-The default model is **Qwen3-0.6B**, served by **llama.cpp**. Setup downloads **640 MB of official Q8 source weights, then converts them to a **391 MB Q4 model\***\* and, on Linux x64, a **17 MB runtime archive\*\*. The source weights and runtime are pinned and SHA-256 verified. The larger weights are deleted after conversion; a local checksum verifies the retained model. Nothing downloads during installation, build, or tests.
+The default model is **Qwen3-0.6B**, served by **llama.cpp**. Setup downloads **640 MB of official Q8 source weights**, converts them to a **391 MB Q4 model**, and deletes the larger copy. On Linux x64 it also downloads a **17 MB runtime archive**. Source weights and runtime are pinned and SHA-256 verified; a local checksum verifies the retained model. Installation, build, and tests do not download model weights.
 
 ```sh
 # Explicit opt-in download, once:
