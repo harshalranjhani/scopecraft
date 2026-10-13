@@ -10,7 +10,8 @@ export const STORAGE_KEY = "scopecraft.workspace.v1";
 export function loadWorkspace() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { proposals: examples, settings: defaultSettings, warning: "" };
+    if (!raw)
+      return { proposals: examples, settings: defaultSettings, warning: "" };
     const data = backupSchema.parse(JSON.parse(raw));
     return { proposals: data.proposals, settings: data.settings, warning: "" };
   } catch {

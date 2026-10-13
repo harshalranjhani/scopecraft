@@ -1,0 +1,54 @@
+{
+  "input": {
+    "clientName": "Form & Field",
+    "projectName": "A thoughtful pottery brand",
+    "brief": "I run a small pottery shop. I need a new visual identity: a logo, a color palette, typography, and a short brand guide. I would like two initial logo concepts and two revision rounds. I will provide written business information and visual references. Website design and packaging design are outside this project. The final decision maker, deadline and budget have not been agreed yet.",
+    "hourlyRate": 85,
+    "currency": "USD",
+    "bufferPercent": 15
+  },
+  "scope": {
+    "summary": "A thoughtful pottery brand with a visual identity project initiated by a small pottery shop, focusing on logo, color palette, typography, and brand guide.",
+    "deliverables": [
+      {
+        "title": "Logo Concepts",
+        "description": "Two initial logo concepts provided in a detailed format.",
+        "hours": 20
+      },
+      {
+        "title": "Color Palette",
+        "description": "A visual reference for color palette provided in a detailed format.",
+        "hours": 15
+      },
+      {
+        "title": "Typography",
+        "description": "A visual reference for typography used in the brand guide.",
+        "hours": 10
+      },
+      {
+        "title": "Brand Guide",
+        "description": "Written business information provided in a detailed format.",
+        "hours": 10
+      }
+    ],
+    "exclusions": [
+      "Website design and packaging design",
+      "Final decision maker, deadline, and budget"
+    ],
+    "questions": [
+      "What is the budget for the project?",
+      "Who will be responsible for the logo concepts?",
+      "What is the timeline for the logo concepts and revisions?"
+    ],
+    "risks": [
+      {
+        "severity": "low",
+        "title": "Ambiguity in logo concepts",
+        "detail": "Potential ambiguity in the logo concepts may affect the final decision."
+      }
+    ]
+  },
+  "model": "qwen3-0.6b",
+  "generationMs": 25131,
+  "outputTokens": 310
+}

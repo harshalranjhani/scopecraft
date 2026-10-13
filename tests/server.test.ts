@@ -42,7 +42,7 @@ test("API validates input, authenticates, and reports real inference failures", 
       (await send(input, "secret", "https://evil.example")).status,
       403,
     );
-    assert.equal((await send(input, 'secret', 'not-an-origin')).status, 403);
+    assert.equal((await send(input, "secret", "not-an-origin")).status, 403);
     assert.equal((await send({}, "secret")).status, 400);
     assert.equal((await send(input, "secret")).status, 503);
     assert.equal(
@@ -53,11 +53,59 @@ test("API validates input, authenticates, and reports real inference failures", 
     await close(server);
   }
 });
-test('API returns a validated successful scope and strips thinking blocks', async () => {
-  const scope = { summary: 'Build a focused bakery website.', deliverables: [{title:'Website',description:'Three responsive pages.',hours:20}], exclusions:['Online ordering.'], questions:['Who supplies the copy?'], risks:[{severity:'medium',title:'Content',detail:'The copy is not ready.'}] };
-  const model = createServer(async (req,res) => { for await(const _ of req) { /* Consume the request. */ } res.setHeader('Content-Type','application/json'); res.end(JSON.stringify({choices:[{message:{content:'<think>private reasoning</think>'+JSON.stringify(scope)}}],usage:{completion_tokens:100}})); });
-  const modelUrl=await listen(model); const server=makeServer({aiBaseUrl:modelUrl,model:'qwen'}); const url=await listen(server);
-  try { const response=await fetch(url+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input)}); assert.equal(response.status,200); const result=await response.json(); assert.deepEqual(result.scope,scope); assert.equal(result.model,'qwen'); assert.equal(result.outputTokens,100); } finally { await close(server); await close(model); }
+test("API returns a validated successful scope and strips thinking blocks", async () => {
+  const scope = {
+    summary: "Build a focused bakery website.",
+    deliverables: [
+      { title: "Website", description: "Three responsive pages.", hours: 20 },
+    ],
+    exclusions: ["Online ordering."],
+    questions: ["Who supplies the copy?"],
+    risks: [
+      {
+        severity: "medium",
+        title: "Content",
+        detail: "The copy is not ready.",
+      },
+    ],
+  };
+  const model = createServer(async (req, res) => {
+    for await (const _ of req) {
+      /* Consume the request. */
+    }
+    res.setHeader("Content-Type", "application/json");
+    res.end(
+      JSON.stringify({
+        choices: [
+          {
+            message: {
+              content:
+                "<think>private reasoning</think>" + JSON.stringify(scope),
+            },
+          },
+        ],
+        usage: { completion_tokens: 100 },
+      }),
+    );
+  });
+  const modelUrl = await listen(model);
+  const server = makeServer({ aiBaseUrl: modelUrl, model: "qwen" });
+  const url = await listen(server);
+  try {
+    const response = await fetch(url + "/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    assert.equal(response.status, 200);
+    const result = await response.json();
+    assert.deepEqual(result.scope, scope);
+    assert.equal(result.model, "qwen");
+    assert.equal(result.outputTokens, 100);
+  } finally {
+    await close(server);
+    await close(model);
+  }
 });
 test("API sends schema-constrained requests, validates output, and limits concurrency", async () => {
   let release!: () => void;

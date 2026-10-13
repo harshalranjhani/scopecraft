@@ -16,7 +16,7 @@ async function find(path) {
   return null;
 }
 const binary = (await find(dir)) ?? "llama-server";
-const model = dir + "Qwen3-0.6B-Q8_0.gguf";
+const model = dir + "Qwen3-0.6B-Q4_K_M.gguf";
 if (!existsSync(model)) {
   console.error("Run npm run ai:setup before starting the model.");
   process.exit(1);
@@ -26,9 +26,9 @@ if (process.platform === "linux") {
     readFileSync("/proc/meminfo", "utf8").match(/MemAvailable:\s+(\d+)/)?.[1] ??
       0,
   );
-  if (available < 1300 * 1024) {
+  if (available < 1000 * 1024) {
     console.error(
-      "Not enough available RAM (need 1.3 GB). Stop other task processes or use a separate machine; the model has not been started.",
+      "Not enough available RAM (need 1 GB). Stop other task processes or use a separate machine; the model has not been started.",
     );
     process.exit(1);
   }
@@ -41,9 +41,19 @@ const args = [
   "--port",
   "8080",
   "-c",
-  "4096",
+  "3072",
   "-t",
   "1",
+  "--poll",
+  "0",
+  "--poll-batch",
+  "0",
+  "-b",
+  "256",
+  "-ub",
+  "128",
+  "--sleep-idle-seconds",
+  "60",
   "--parallel",
   "1",
   "--alias",
@@ -58,8 +68,8 @@ const limited =
   existsSync("/run/systemd/system");
 console.log(
   limited
-    ? "Starting with a hard 1.1 GB memory limit and a one-core CPU budget."
-    : "Starting one model worker with a 4096-token context.",
+    ? "Starting with a hard 900 MB memory limit and a one-core CPU budget."
+    : "Starting one model worker with a 3072-token context.",
 );
 const child = spawn(
   limited ? "systemd-run" : binary,
@@ -68,9 +78,7 @@ const child = spawn(
         "--scope",
         "--quiet",
         "-p",
-        "MemoryMax=1100M",
-        "-p",
-        "MemoryHigh=1050M",
+        "MemoryMax=900M",
         "-p",
         "CPUQuota=100%",
         binary,

@@ -48,9 +48,15 @@ export const proposalSchema = briefSchema.extend({
   status: z.enum(["draft", "ready", "accepted"]),
   scope: scopeSchema.extend({
     summary: z.string().max(1400),
-    deliverables: z.array(scopeSchema.shape.deliverables.element.extend({
-      title: z.string().max(100), description: z.string().max(600),
-    })).min(1).max(8),
+    deliverables: z
+      .array(
+        scopeSchema.shape.deliverables.element.extend({
+          title: z.string().max(100),
+          description: z.string().max(600),
+        }),
+      )
+      .min(1)
+      .max(8),
     exclusions: z.array(z.string().max(300)).min(1).max(6),
     questions: z.array(z.string().max(300)).min(1).max(6),
   }),
@@ -67,11 +73,17 @@ export const settingsSchema = z.object({
   currency: briefSchema.shape.currency,
   bufferPercent: z.number().min(0).max(50),
 });
-export const backupSchema = z.object({
-  version: z.literal(1),
-  proposals: z.array(proposalSchema).max(200),
-  settings: settingsSchema,
-});
+export const backupSchema = z
+  .object({
+    version: z.literal(1),
+    proposals: z.array(proposalSchema).max(200),
+    settings: settingsSchema,
+  })
+  .refine(
+    (data) =>
+      new Set(data.proposals.map((p) => p.id)).size === data.proposals.length,
+    "Proposal IDs must be unique.",
+  );
 export type Brief = z.infer<typeof briefSchema>;
 export type Scope = z.infer<typeof scopeSchema>;
 export type Proposal = z.infer<typeof proposalSchema>;

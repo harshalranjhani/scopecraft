@@ -25,7 +25,7 @@ Open **http://localhost:5173**. Examples work before a model is connected. Draft
 
 ### Optional local AI
 
-The default model is **Qwen3-0.6B**, served by **llama.cpp**. Setup downloads **640 MB of official Q8 weights** and, on Linux x64, a **17 MB runtime archive**. Both files are pinned and SHA-256 verified. Nothing downloads during installation, build, or tests.
+The default model is **Qwen3-0.6B**, served by **llama.cpp**. Setup downloads **640 MB of official Q8 source weights, then converts them to a **391 MB Q4 model\***\* and, on Linux x64, a **17 MB runtime archive\*\*. The source weights and runtime are pinned and SHA-256 verified. The larger weights are deleted after conversion; a local checksum verifies the retained model. Nothing downloads during installation, build, or tests.
 
 ```sh
 # Explicit opt-in download, once:
@@ -38,9 +38,9 @@ npm run ai:start
 npm run dev
 ```
 
-Allow at least **1.3 GB available RAM** at model startup. Root Linux installations with systemd use a **hard 1.1 GB memory cap**, a **one-core CPU budget**, one worker, one inference thread, and a 4096-token context. Other platforms run directly; apply your own limits when hosting. Small-model estimates need human review.
+Allow at least **1 GB available RAM** at model startup. Root Linux installations with systemd use a **hard 900 MB memory cap**, a **one-core CPU budget**, one worker, one inference thread, and a 3072-token context. The runtime unloads weights after 60 seconds of inactivity. Other platforms run directly; apply your own limits when hosting. Small-model estimates need human review.
 
-On macOS, install the runtime with `brew install llama.cpp`. On other platforms, put `llama-server` on PATH using the [official releases](https://github.com/ggml-org/llama.cpp/releases). Automatic runtime installation targets Linux x64 with compatible glibc; the weights are downloaded on all platforms.
+On macOS, install the runtime with `brew install llama.cpp`. On other platforms, put `llama-server` and `llama-quantize` on PATH using the [official releases](https://github.com/ggml-org/llama.cpp/releases). Automatic runtime installation targets Linux x64 with compatible glibc; the weights are downloaded on all platforms.
 
 Initial setup requires internet. Once runtime, weights and dependencies are downloaded, inference and the locally served UI work without internet. Fonts are bundled locally; there is no analytics or external AI request in the default setup.
 

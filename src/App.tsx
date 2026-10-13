@@ -111,7 +111,10 @@ function Modal({
       ref={ref}
       className={`modal ${wide ? "modal-wide" : ""}`}
       aria-label={title}
-      onCancel={onClose}
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -251,6 +254,15 @@ export default function App() {
     setToast(message);
   }
   async function refreshHealth() {
+    if (import.meta.env.VITE_STATIC_DEMO === "true") {
+      setHealth({
+        available: false,
+        model: "qwen3-0.6b",
+        tokenRequired: false,
+        busy: false,
+      });
+      return;
+    }
     try {
       const res = await fetch("./api/health");
       if (!res.ok) throw new Error();
@@ -314,7 +326,19 @@ export default function App() {
     );
   }
   function newProposal() {
-    if (!draft.brief) setDraft({ ...draft, hourlyRate: settings.hourlyRate, currency: settings.currency, bufferPercent: settings.bufferPercent });
+    if (proposals.length >= 200) {
+      notify(
+        "This workspace holds up to 200 proposals. Export a backup and remove old proposals before adding another.",
+      );
+      return;
+    }
+    if (!draft.brief)
+      setDraft({
+        ...draft,
+        hourlyRate: settings.hourlyRate,
+        currency: settings.currency,
+        bufferPercent: settings.bufferPercent,
+      });
     setGenerationError("");
     setModal("new");
     setMobileMenu(false);
@@ -598,7 +622,16 @@ export default function App() {
                   <button
                     className="button primary"
                     onClick={() => {
-                      if (!selected.clientName.trim() || !selected.projectName.trim() || !scopeSchema.safeParse(selected.scope).success) { notify('Complete the project name, client, and scope fields before exporting.'); return; }
+                      if (
+                        !selected.clientName.trim() ||
+                        !selected.projectName.trim() ||
+                        !scopeSchema.safeParse(selected.scope).success
+                      ) {
+                        notify(
+                          "Complete the project name, client, and scope fields before exporting.",
+                        );
+                        return;
+                      }
                       setModal("export");
                     }}
                   >

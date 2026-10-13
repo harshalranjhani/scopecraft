@@ -761,10 +761,9 @@ nav > button:hover {
 .table-head,
 .proposal-row {
   display: grid;
-  grid-template-columns: minmax(210px, 2.4fr) minmax(100px, 1fr) minmax(
-      95px,
-      1fr
-    ) 63px 18px;
+  grid-template-columns:
+    minmax(210px, 2.4fr) minmax(100px, 1fr) minmax(95px, 1fr)
+    63px 18px;
   gap: 16px;
   align-items: center;
 }

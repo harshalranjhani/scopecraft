@@ -7,13 +7,27 @@ import { execFileSync } from "node:child_process";
 
 if (!process.argv.includes("--download")) {
   console.log(
-    "Optional AI setup downloads 640 MB of weights plus a 17 MB Linux runtime. Allow at least 1.5 GB of free RAM. Use a suitable personal machine, not a small shared server.",
+    "Optional AI setup downloads 640 MB of verified weights, then converts them to a 391 MB Q4 model. Linux runtime archive: 17 MB. Allow 1 GB available RAM and 1.1 GB temporary disk space for setup.",
   );
   console.log("To opt in: npm run ai:setup -- --download");
   process.exit(0);
 }
 const dir = new URL("../.local/ai/", import.meta.url);
 await mkdir(dir, { recursive: true });
+const optimizedModel = new URL("Qwen3-0.6B-Q4_K_M.gguf", dir);
+if (existsSync(optimizedModel) && existsSync(new URL("model.sha256", dir))) {
+  const { readFile } = await import("node:fs/promises");
+  const checksum = createHash("sha256");
+  for await (const chunk of createReadStream(optimizedModel))
+    checksum.update(chunk);
+  if (
+    checksum.digest("hex") ===
+    (await readFile(new URL("model.sha256", dir), "utf8")).trim()
+  ) {
+    console.log("Quantized model is already verified. No downloads needed.");
+    process.exit(0);
+  }
+}
 async function download(url, name, checksum) {
   const target = new URL(name, dir);
   const hashFile = async (path) => {
@@ -56,6 +70,56 @@ await download(
   "https://huggingface.co/Qwen/Qwen3-0.6B-GGUF/resolve/23749fefcc72300e3a2ad315e1317431b06b590a/Qwen3-0.6B-Q8_0.gguf",
   "Qwen3-0.6B-Q8_0.gguf",
   "9465e63a22add5354d9bb4b99e90117043c7124007664907259bd16d043bb031",
+);
+let quantizer =
+  process.platform === "win32" ? "llama-quantize.exe" : "llama-quantize";
+let runtimeDir = "";
+if (process.platform === "linux" && process.arch === "x64") {
+  runtimeDir = new URL("llama-b11588/", dir).pathname;
+  quantizer = runtimeDir + "llama-quantize";
+}
+const quantizeArgs = [
+  "--allow-requantize",
+  new URL("Qwen3-0.6B-Q8_0.gguf", dir).pathname,
+  optimizedModel.pathname,
+  "Q4_K_M",
+  "1",
+];
+const limited =
+  process.platform === "linux" &&
+  process.getuid?.() === 0 &&
+  existsSync("/run/systemd/system");
+console.log("Converting the verified weights to Q4_K_M for lower memory use…");
+const env = {
+  ...process.env,
+  ...(runtimeDir ? { LD_LIBRARY_PATH: runtimeDir } : {}),
+};
+execFileSync(
+  limited ? "systemd-run" : quantizer,
+  limited
+    ? [
+        "--scope",
+        "--quiet",
+        "-p",
+        "MemoryMax=900M",
+        "-p",
+        "CPUQuota=100%",
+        "env",
+        ...(runtimeDir ? [`LD_LIBRARY_PATH=${runtimeDir}`] : []),
+        quantizer,
+        ...quantizeArgs,
+      ]
+    : quantizeArgs,
+  { env, stdio: "inherit" },
+);
+const checksum = createHash("sha256");
+for await (const chunk of createReadStream(optimizedModel))
+  checksum.update(chunk);
+const { writeFile } = await import("node:fs/promises");
+await writeFile(new URL("model.sha256", dir), checksum.digest("hex") + "\n");
+await rm(new URL("Qwen3-0.6B-Q8_0.gguf", dir));
+console.log(
+  "Removed the larger source weights. Only the optimized model is retained.",
 );
 console.log(
   "Ready. Start local inference with npm run ai:start. Initial downloads need internet; inference does not.",
