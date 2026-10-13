@@ -1,10 +1,15 @@
-import { mkdir, readFile, rename, rm } from 'node:fs/promises';
+import { mkdir, rename, rm } from 'node:fs/promises';
 import { createWriteStream, createReadStream, existsSync } from 'node:fs';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 
+if (!process.argv.includes('--download')) {
+  console.log('Optional AI setup downloads 640 MB of weights plus a 17 MB Linux runtime. Allow at least 1.5 GB of free RAM. Use a suitable personal machine, not a small shared server.');
+  console.log('To opt in: npm run ai:setup -- --download');
+  process.exit(0);
+}
 const dir = new URL('../.local/ai/', import.meta.url);
 await mkdir(dir, { recursive: true });
 async function download(url, name, checksum) {
