@@ -51,7 +51,7 @@ import {
   type Proposal,
   type Settings,
 } from "./domain";
-import { exampleBriefs, examples } from "./examples";
+import { exampleBriefs, examples, recordedExample } from "./examples";
 import { downloadFile, loadWorkspace, saveWorkspace } from "./storage";
 
 type Health = {
@@ -346,7 +346,7 @@ export default function App() {
   }
   function loadExample(index: number) {
     const p: Proposal = {
-      ...structuredClone(examples[index]),
+      ...structuredClone(index === -1 ? recordedExample : examples[index]),
       id: crypto.randomUUID(),
       createdAt: new Date().toISOString(),
     };
@@ -474,7 +474,10 @@ export default function App() {
             onClick={() => setMobileMenu(false)}
           />
         )}
-        <aside className={`sidebar ${mobileMenu ? "sidebar-open" : ""}`}>
+        <aside
+          className={`sidebar ${mobileMenu ? "sidebar-open" : ""}`}
+          aria-label="Workspace navigation"
+        >
           <button className="brand" onClick={() => navigate("overview")}>
             <img src="./favicon.svg" alt="" />
             <span>
@@ -612,7 +615,9 @@ export default function App() {
                     <p>
                       {selected.source === "local-ai"
                         ? `${selected.model} · generated in ${(selected.generationMs / 1000).toFixed(1)}s`
-                        : "Curated example · all fields are editable"}
+                        : selected.model.startsWith("qwen")
+                          ? `Recorded ${selected.model} response · original run ${(selected.generationMs / 1000).toFixed(1)}s · editable replay`
+                          : "Curated example · all fields are editable"}
                       <span className="saved">
                         <Check size={13} />
                         {storageError ? "In memory" : "Saved on this browser"}
@@ -952,7 +957,10 @@ export default function App() {
                       <ClientDocument p={selected} settings={settings} />
                     )}
                   </section>
-                  <aside className="quote-sidebar">
+                  <aside
+                    className="quote-sidebar"
+                    aria-label="Quote and status"
+                  >
                     <div className="quote-card">
                       <div className="quote-title">
                         <span>THE INVESTMENT</span>
@@ -1463,7 +1471,9 @@ export default function App() {
                               {p.clientName}{" "}
                               <span className="example-label">
                                 {p.source === "example"
-                                  ? "· Example"
+                                  ? p.model.startsWith("qwen")
+                                    ? "· Recorded AI"
+                                    : "· Example"
                                   : "· Local AI"}
                               </span>
                             </small>
@@ -1715,6 +1725,13 @@ export default function App() {
             </div>
             {!health?.available && (
               <div className="example-demo-action">
+                <button
+                  type="button"
+                  className="text-button"
+                  onClick={() => loadExample(-1)}
+                >
+                  <Sparkles size={15} /> Explore the recorded Qwen draft
+                </button>
                 <button
                   type="button"
                   className="text-button"

@@ -1,4 +1,16 @@
-import type { Proposal, Brief } from "./domain";
+import { proposalSchema, type Proposal, type Brief } from "./domain";
+import recordedRun from "./data/recorded-run.json";
+
+export const recordedExample = proposalSchema.parse({
+  ...recordedRun.input,
+  scope: recordedRun.scope,
+  model: recordedRun.model,
+  generationMs: recordedRun.generationMs,
+  source: "example",
+  status: "draft",
+  id: "recorded-qwen",
+  createdAt: "2026-10-13T00:00:00.000Z",
+});
 
 export const exampleBriefs: (Brief & { label: string; category: string })[] = [
   {
