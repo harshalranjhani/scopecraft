@@ -1,0 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=Manrope:wght@400;500;600;650;700;750;800&display=swap');
+:root { font-family: 'DM Sans', sans-serif; color: #273d33; background: #f7f8f3; font-synthesis: none; }
+body { margin: 0; }
+.foundation { max-width: 640px; margin: 20vh auto; padding: 32px; }
+h1 { font-family: 'Manrope', sans-serif; font-size: 64px; letter-spacing: -4px; }
